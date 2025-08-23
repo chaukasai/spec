@@ -128,8 +128,8 @@ jobs:
 
       - name: Test client package installation
         run: |
-          cd dist
-          pip install chaukas-spec-client-*.whl
+          CLIENT_WHL=$(ls dist/chaukas-spec-client-*.whl)
+          pip install "$CLIENT_WHL"
           python -c "
           from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientServiceStub
           from chaukas.spec.common.v1.events_pb2 import Event, EventType
@@ -138,9 +138,9 @@ jobs:
 
       - name: Test server package installation
         run: |
-          cd dist
           pip uninstall -y chaukas-spec-client
-          pip install chaukas-spec-server-*.whl
+          SERVER_WHL=$(ls dist/chaukas-spec-server-*.whl)
+          pip install "$SERVER_WHL"
           python -c "
           from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServiceServicer
           from chaukas.spec.common.v1.events_pb2 import Event, EventType
