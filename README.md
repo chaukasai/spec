@@ -38,31 +38,33 @@ pip install chaukas-spec
 
 ### SDK Integration (Client-side)
 ```python
-from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientStub
+from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientServiceStub
+from chaukas.spec.client.v1.client_pb2 import IngestEventRequest
 from chaukas.spec.common.v1.events_pb2 import Event, EventType
 
 # Create gRPC client
-stub = ChaukasClientStub(channel)
+stub = ChaukasClientServiceStub(channel)
 
 # Create and send event
 event = Event(
     event_id="evt_123",
-    type=EventType.AGENT_START,
+    type=EventType.EVENT_TYPE_AGENT_START,
     session_id="session_abc"
 )
-stub.IngestEvent(event)
+request = IngestEventRequest(event=event)
+stub.IngestEvent(request)
 ```
 
 ### Platform Implementation (Server-side)
 ```python
-from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServicer
+from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServiceServicer
 from chaukas.spec.server.v1.server_pb2 import IngestEventResponse
-from chaukas.spec.common.v1.events_pb2 import Event
 
-class MyChaukasServer(ChaukasServerServicer):
+class MyChaukasServer(ChaukasServerServiceServicer):
     def IngestEvent(self, request, context):
+        # request is IngestEventRequest with .event field
         return IngestEventResponse(
-            event_id=request.event_id,
+            event_id=request.event.event_id,
             status="accepted"
         )
 ```
@@ -71,17 +73,16 @@ class MyChaukasServer(ChaukasServerServicer):
 
 ```go
 import (
-    commonv1 "github.com/chaukasai/spec/chaukas/spec/common/v1"
     serverv1 "github.com/chaukasai/spec/chaukas/spec/server/v1"
 )
 
 type MyChaukasServer struct {
-    serverv1.UnimplementedChaukasServerServer
+    serverv1.UnimplementedChaukasServerServiceServer
 }
 
-func (s *MyChaukasServer) IngestEvent(ctx context.Context, req *commonv1.Event) (*serverv1.IngestEventResponse, error) {
+func (s *MyChaukasServer) IngestEvent(ctx context.Context, req *serverv1.IngestEventRequest) (*serverv1.IngestEventResponse, error) {
     return &serverv1.IngestEventResponse{
-        EventId: req.EventId,
+        EventId: req.Event.EventId,
         Status: "accepted",
     }, nil
 }

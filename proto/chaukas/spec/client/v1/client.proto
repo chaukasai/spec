@@ -14,22 +14,63 @@ option go_package = "github.com/chaukasai/spec/chaukas/spec/client/v1;v1";
 
 import "chaukas/spec/common/v1/events.proto";
 import "chaukas/spec/common/v1/query.proto";
-import "google/protobuf/empty.proto";
 
 // Client-side Chaukas service for SDK integration
-service ChaukasClient {
+service ChaukasClientService {
   // Health check endpoint
-  rpc Healthz(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc Healthz(HealthzRequest) returns (HealthzResponse);
   
   // Get supported capabilities
-  rpc GetCapabilities(google.protobuf.Empty) returns (chaukas.spec.common.v1.Capabilities);
+  rpc GetCapabilities(GetCapabilitiesRequest) returns (GetCapabilitiesResponse);
   
   // Ingest a single event
-  rpc IngestEvent(chaukas.spec.common.v1.Event) returns (google.protobuf.Empty);
+  rpc IngestEvent(IngestEventRequest) returns (IngestEventResponse);
   
   // Ingest a batch of events
-  rpc IngestEventBatch(chaukas.spec.common.v1.EventBatch) returns (google.protobuf.Empty);
+  rpc IngestEventBatch(IngestEventBatchRequest) returns (IngestEventBatchResponse);
   
   // Query events
-  rpc QueryEvents(chaukas.spec.common.v1.QueryRequest) returns (chaukas.spec.common.v1.QueryResponse);
+  rpc QueryEvents(QueryEventsRequest) returns (QueryEventsResponse);
+}
+
+// Request and response types for ChaukasClientService RPCs
+
+// Health check request
+message HealthzRequest {}
+
+// Health check response  
+message HealthzResponse {}
+
+// Get capabilities request
+message GetCapabilitiesRequest {}
+
+// Get capabilities response
+message GetCapabilitiesResponse {
+  chaukas.spec.common.v1.Capabilities capabilities = 1;
+}
+
+// Ingest single event request
+message IngestEventRequest {
+  chaukas.spec.common.v1.Event event = 1;
+}
+
+// Ingest single event response
+message IngestEventResponse {}
+
+// Ingest event batch request
+message IngestEventBatchRequest {
+  chaukas.spec.common.v1.EventBatch event_batch = 1;
+}
+
+// Ingest event batch response
+message IngestEventBatchResponse {}
+
+// Query events request
+message QueryEventsRequest {
+  chaukas.spec.common.v1.QueryRequest query = 1;
+}
+
+// Query events response
+message QueryEventsResponse {
+  chaukas.spec.common.v1.QueryResponse response = 1;
 }

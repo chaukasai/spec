@@ -24,58 +24,58 @@ enum EventType {
   EVENT_TYPE_UNSPECIFIED = 0;
 
   // Session lifecycle
-  SESSION_START = 1;
-  SESSION_END   = 2;
+  EVENT_TYPE_SESSION_START = 1;
+  EVENT_TYPE_SESSION_END   = 2;
 
   // Agent spans
-  AGENT_START = 10;
-  AGENT_END   = 11;
+  EVENT_TYPE_AGENT_START = 10;
+  EVENT_TYPE_AGENT_END   = 11;
 
   // LLM/tool spans
-  MODEL_INVOCATION_START = 20;
-  MODEL_INVOCATION_END   = 21;
-  TOOL_CALL_START        = 22;
-  TOOL_CALL_END          = 23;
+  EVENT_TYPE_MODEL_INVOCATION_START = 20;
+  EVENT_TYPE_MODEL_INVOCATION_END   = 21;
+  EVENT_TYPE_TOOL_CALL_START        = 22;
+  EVENT_TYPE_TOOL_CALL_END          = 23;
 
   // I/O
-  INPUT_RECEIVED  = 30;
-  OUTPUT_EMITTED  = 31;
+  EVENT_TYPE_INPUT_RECEIVED  = 30;
+  EVENT_TYPE_OUTPUT_EMITTED  = 31;
 
   // Cross-cutting
-  ERROR           = 40;
-  RETRY           = 41;
+  EVENT_TYPE_ERROR           = 40;
+  EVENT_TYPE_RETRY           = 41;
 
   // Optional extension types (x_*)
-  POLICY_DECISION = 60;   // x_POLICY_DECISION
-  DATA_ACCESS     = 61;   // x_DATA_ACCESS (RAG/retrieval)
-  STATE_UPDATE    = 62;
-  SYSTEM          = 63;
+  EVENT_TYPE_POLICY_DECISION = 60;   // x_POLICY_DECISION
+  EVENT_TYPE_DATA_ACCESS     = 61;   // x_DATA_ACCESS (RAG/retrieval)
+  EVENT_TYPE_STATE_UPDATE    = 62;
+  EVENT_TYPE_SYSTEM          = 63;
 }
 
 enum EventStatus {
   EVENT_STATUS_UNSPECIFIED = 0;
-  STARTED      = 1;
-  IN_PROGRESS  = 2;
-  COMPLETED    = 3;
-  FAILED       = 4;
-  CANCELLED    = 5;
+  EVENT_STATUS_STARTED      = 1;
+  EVENT_STATUS_IN_PROGRESS  = 2;
+  EVENT_STATUS_COMPLETED    = 3;
+  EVENT_STATUS_FAILED       = 4;
+  EVENT_STATUS_CANCELLED    = 5;
 }
 
 enum Severity {
   SEVERITY_UNSPECIFIED = 0;
-  DEBUG   = 1;
-  INFO    = 2;
-  WARN    = 3;
-  ERROR_S = 4; // ERROR is reserved by type above; name with suffix
+  SEVERITY_DEBUG   = 1;
+  SEVERITY_INFO    = 2;
+  SEVERITY_WARN    = 3;
+  SEVERITY_ERROR   = 4;
 }
 
 enum Author {
   AUTHOR_UNSPECIFIED = 0;
-  USER   = 1;
-  AGENT  = 2;
-  TOOL   = 3;
-  SYSTEM_A = 4; // SYSTEM reserved above; name with suffix
-  LLM    = 5;
+  AUTHOR_USER   = 1;
+  AUTHOR_AGENT  = 2;
+  AUTHOR_TOOL   = 3;
+  AUTHOR_SYSTEM = 4;
+  AUTHOR_LLM    = 5;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
