@@ -41,7 +41,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check for breaking changes
-        run: buf breaking --against '.git#branch=main'
+        run: buf breaking --against 'https://github.com/${{ github.repository }}.git#branch=main'
 
   build:
     name: Build & Test
@@ -98,12 +98,8 @@ jobs:
       - name: Build Python packages
         if: matrix.go-version == '1.22' && matrix.python-version == '3.11'
         run: |
-          echo "Building packages with Go ${{ matrix.go-version }} and Python ${{ matrix.python-version }}"
-          # Ensure we have build dependencies
           pip install build
           make build-packages
-          echo "Built packages:"
-          ls -la dist/ || echo "No dist directory created"
       
       # Upload packages (only from one matrix job)
       - name: Upload package artifacts  
@@ -112,7 +108,7 @@ jobs:
         with:
           name: python-packages
           path: dist/
-          retention-days: 1
+          retention-days: 7
 
   package-test:
     name: Package Installation Test
@@ -139,18 +135,6 @@ jobs:
           name: python-packages
           path: dist/
 
-      - name: Debug directory structure
-        run: |
-          echo "=== Current working directory ==="
-          pwd
-          echo "=== Contents of current directory ==="
-          ls -la
-          echo "=== Looking for dist directory ==="
-          find . -name "dist" -type d 2>/dev/null || echo "No dist directory found"
-          echo "=== Looking for .whl files anywhere ==="
-          find . -name "*.whl" 2>/dev/null || echo "No .whl files found"
-          echo "=== Looking for any package files ==="
-          find . -name "*chaukas*" 2>/dev/null || echo "No chaukas files found"
 
       - name: Test client package installation
         run: |
@@ -173,9 +157,3 @@ jobs:
           print('✅ Server package works')
           "
 
-      - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-packages
-          path: dist/
-          retention-days: 1
