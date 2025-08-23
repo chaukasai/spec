@@ -23,7 +23,7 @@ python/chaukas/spec/     # Generated Python packages
 ├── client/v1/       # Client gRPC stubs + models
 └── server/v1/       # Server gRPC stubs + server-specific models
 
-go/                      # Generated Go packages  
+go/chaukas/spec/         # Generated Go packages  
 ├── common/v1/       # Data models
 ├── client/v1/       # Client gRPC stubs (reference)
 └── server/v1/       # Server gRPC stubs + server-specific models
@@ -71,16 +71,16 @@ class MyChaukasServer(ChaukasServerServicer):
 
 ```go
 import (
-    "github.com/chaukasai/spec/common/v1"
-    "github.com/chaukasai/spec/server/v1"
+    commonv1 "github.com/chaukasai/spec/chaukas/spec/common/v1"
+    serverv1 "github.com/chaukasai/spec/chaukas/spec/server/v1"
 )
 
 type MyChaukasServer struct {
-    server.UnimplementedChaukasServerServer
+    serverv1.UnimplementedChaukasServerServer
 }
 
-func (s *MyChaukasServer) IngestEvent(ctx context.Context, req *common.Event) (*server.IngestEventResponse, error) {
-    return &server.IngestEventResponse{
+func (s *MyChaukasServer) IngestEvent(ctx context.Context, req *commonv1.Event) (*serverv1.IngestEventResponse, error) {
+    return &serverv1.IngestEventResponse{
         EventId: req.EventId,
         Status: "accepted",
     }, nil

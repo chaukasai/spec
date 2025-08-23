@@ -10,7 +10,7 @@ syntax = "proto3";
 
 package chaukas.spec.common.v1;
 
-option go_package = "github.com/chaukasai/spec/common/v1;v1";
+option go_package = "github.com/chaukasai/spec/chaukas/spec/common/v1;v1";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";

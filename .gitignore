@@ -9,9 +9,7 @@ python/chaukas/spec/server/v1/*_pb2.py
 python/chaukas/spec/server/v1/*_pb2.pyi
 python/chaukas/spec/server/v1/*_grpc.py
 
-go/client/
-go/common/
-go/server/
+go/chaukas/
 go/go.sum
 
 # Python
