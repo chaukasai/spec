@@ -7,7 +7,7 @@ name = "chaukas-spec-server"
 version = "1.0.0"
 description = "Server implementation framework for Chaukas agent audit and explainability platform"
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = {file = "LICENSE"}
 authors = [
     {name = "Chaukas Team"}
 ]

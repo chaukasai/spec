@@ -7,9 +7,11 @@ dist/
 python-client/chaukas/
 python-client/dist/
 python-client/build/
+python-client/LICENSE
 python-server/chaukas/
 python-server/dist/
 python-server/build/
+python-server/LICENSE
 *.egg-info/
 
 # Python
