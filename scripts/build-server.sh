@@ -17,9 +17,12 @@ cp -r .generated/python/chaukas/spec/common python-server/chaukas/spec/
 cp -r .generated/python/chaukas/spec/server python-server/chaukas/spec/
 
 # Copy package metadata files
-cp .generated/python/chaukas/__init__.py python-server/chaukas/
+cp resources/server-init.py python-server/chaukas/__init__.py
 cp .generated/python/chaukas/spec/__init__.py python-server/chaukas/spec/
 cp .generated/python/chaukas/py.typed python-server/chaukas/
+
+# Copy license file
+cp LICENSE python-server/
 
 # Build the package
 cd python-server

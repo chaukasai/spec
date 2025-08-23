@@ -17,9 +17,12 @@ cp -r .generated/python/chaukas/spec/common python-client/chaukas/spec/
 cp -r .generated/python/chaukas/spec/client python-client/chaukas/spec/
 
 # Copy package metadata files
-cp .generated/python/chaukas/__init__.py python-client/chaukas/
+cp resources/client-init.py python-client/chaukas/__init__.py
 cp .generated/python/chaukas/spec/__init__.py python-client/chaukas/spec/
 cp .generated/python/chaukas/py.typed python-client/chaukas/
+
+# Copy license file
+cp LICENSE python-client/
 
 # Build the package
 cd python-client
