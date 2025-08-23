@@ -1,16 +1,17 @@
 # Generated Protocol Buffer code
-python/chaukas/spec/common/v1/*_pb2.py
-python/chaukas/spec/common/v1/*_pb2.pyi
-python/chaukas/spec/common/v1/*_grpc.py
-python/chaukas/spec/client/v1/*_pb2.py
-python/chaukas/spec/client/v1/*_pb2.pyi
-python/chaukas/spec/client/v1/*_grpc.py
-python/chaukas/spec/server/v1/*_pb2.py
-python/chaukas/spec/server/v1/*_pb2.pyi
-python/chaukas/spec/server/v1/*_grpc.py
-
+.generated/
 go/chaukas/
 go/go.sum
+
+# Package builds
+dist/
+python-client/chaukas/
+python-client/dist/
+python-client/build/
+python-server/chaukas/
+python-server/dist/
+python-server/build/
+*.egg-info/
 
 # Python
 __pycache__/

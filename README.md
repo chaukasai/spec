@@ -18,23 +18,35 @@ proto/chaukas/spec/
 ├── client/v1/       # Client-side gRPC service definitions  
 └── server/v1/       # Server-side gRPC service definitions
 
-python/chaukas/spec/     # Generated Python packages
-├── common/v1/       # Data models only
-├── client/v1/       # Client gRPC stubs + models
+python-client/           # Client SDK package (chaukas-spec-client)
+python-server/           # Server implementation package (chaukas-spec-server)
+
+go/chaukas/spec/         # Generated Go packages and module
+├── common/v1/       # Data models
+├── client/v1/       # Client gRPC stubs
 └── server/v1/       # Server gRPC stubs + server-specific models
 
-go/chaukas/spec/         # Generated Go packages  
-├── common/v1/       # Data models
-├── client/v1/       # Client gRPC stubs (reference)
-└── server/v1/       # Server gRPC stubs + server-specific models
+.generated/python/       # Temporary generated Python code (build artifact)
+```
+
+## Installation
+
+### For Client-side SDK Development
+```bash
+pip install chaukas-spec-client
+```
+
+### For Server-side Platform Implementation
+```bash
+pip install chaukas-spec-server
+```
+
+### For Go Development
+```bash
+go get github.com/chaukasai/spec
 ```
 
 ## Python Usage
-
-### Installation
-```bash
-pip install chaukas-spec
-```
 
 ### SDK Integration (Client-side)
 ```python
@@ -90,28 +102,55 @@ func (s *MyChaukasServer) IngestEvent(ctx context.Context, req *serverv1.IngestE
 
 ## Development
 
-### Generate All Code
+### Generate Code
 ```bash
 make gen-all        # Generate both Python and Go code
+make gen-python     # Generate Python code only (for packages)
+make gen-go         # Generate Go code only
 ```
 
-### Generate Language-Specific Code
+### Build Packages
 ```bash
-make gen-python     # Python client + server stubs
-make gen-go         # Go server stubs only
+make build-packages # Build both client and server Python packages
+make build-client   # Build client package only
+make build-server   # Build server package only
+```
+
+### Test Packages
+```bash
+make test-packages  # Test both packages can be installed and imported
 ```
 
 ### Clean Generated Code
 ```bash
 make clean-all      # Clean all generated code
-make clean-python   # Clean Python generated code
-make clean-go       # Clean Go generated code
+make clean-packages # Clean built packages
 ```
 
-### Install Python Package
+### Lint and Format
 ```bash
-make install-python # Install Python package in development mode
+make lint           # Lint proto files with buf
+make format         # Format proto files with buf
+make breaking       # Check for breaking changes against main
 ```
+
+## CI/CD Pipeline
+
+[![CI](https://github.com/chaukasai/spec/workflows/CI/badge.svg)](https://github.com/chaukasai/spec/actions)
+
+The repository includes a comprehensive CI/CD pipeline that:
+
+1. **🔍 Lints & Validates**: Runs `buf lint` and format checking
+2. **🚨 Breaking Changes**: Detects API breaking changes on PRs
+3. **🔨 Build & Test**: Generates code and tests compilation across multiple Python/Go versions
+4. **📦 Package Building**: Creates separate client and server Python packages
+5. **🚀 Automated Releases**: Publishes to PyPI and Go modules on version tags
+
+### Manual Release Process
+1. Update version in package files
+2. Create a git tag: `git tag v1.0.0`
+3. Push the tag: `git push origin v1.0.0`
+4. GitHub Actions will automatically build and publish packages
 
 ## Architecture
 

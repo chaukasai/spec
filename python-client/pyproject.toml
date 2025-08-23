@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "chaukas-spec"
+name = "chaukas-spec-client"
 version = "1.0.0"
-description = "Protocol Buffer specifications for Chaukas agent audit and explainability platform"
+description = "Client SDK for Chaukas agent audit and explainability platform"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [
@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: System :: Monitoring",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 requires-python = ">=3.8"
 dependencies = [
@@ -34,6 +35,7 @@ dependencies = [
 Homepage = "https://github.com/chaukasai/spec"
 Repository = "https://github.com/chaukasai/spec"
 Issues = "https://github.com/chaukasai/spec/issues"
+Documentation = "https://github.com/chaukasai/spec#client-side-sdk-development"
 
 [tool.setuptools.packages.find]
 where = ["."]
