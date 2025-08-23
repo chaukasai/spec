@@ -53,25 +53,32 @@ jobs:
 
       - name: Verify package contents
         run: |
-          echo "=== ${{ inputs.package_type }} Package Contents ==="
-          tar -tf dist/chaukas_spec_${{ inputs.package_type }}-*.tar.gz | head -20
+          echo "=== Client Package Contents ==="
+          tar -tf dist/chaukas_spec_client-*.tar.gz | head -20
+          echo "=== Server Package Contents ==="
+          tar -tf dist/chaukas_spec_server-*.tar.gz | head -20
 
-      - name: Test package installation
+      - name: Test package installations
         run: |
-          pip install dist/chaukas_spec_${{ inputs.package_type }}-*.whl
-          if [ "${{ inputs.package_type }}" = "client" ]; then
-            python -c "
-            from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientServiceStub
-            from chaukas.spec.common.v1.events_pb2 import EventType
-            print('✅ Client package installs and imports correctly')
-            "
-          else
-            python -c "
-            from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServiceServicer
-            from chaukas.spec.common.v1.events_pb2 import EventType
-            print('✅ Server package installs and imports correctly')
-            "
-          fi
+          # Test client package
+          CLIENT_WHL=$(ls dist/chaukas_spec_client-*.whl)
+          pip install "$CLIENT_WHL"
+          python -c "
+          from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientServiceStub
+          from chaukas.spec.common.v1.events_pb2 import EventType
+          print('✅ Client package installs and imports correctly')
+          "
+          pip uninstall -y chaukas-spec-client
+          
+          # Test server package  
+          SERVER_WHL=$(ls dist/chaukas_spec_server-*.whl)
+          pip install "$SERVER_WHL"
+          python -c "
+          from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServiceServicer
+          from chaukas.spec.common.v1.events_pb2 import EventType
+          print('✅ Server package installs and imports correctly')
+          "
+          pip uninstall -y chaukas-spec-server
 
       - name: Generate changelog
         id: changelog
@@ -83,7 +90,6 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: inputs.package_type == 'client'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref }}
@@ -116,15 +122,14 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
 
-      - name: Publish package to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          twine upload dist/chaukas_spec_${{ inputs.package_type }}-*
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-packages
+          path: dist/
+          retention-days: 7
 
       - name: Update Go module
-        if: inputs.package_type == 'client'
         run: |
           # Go modules are automatically published via Git tags
           # Verify the module can be fetched
