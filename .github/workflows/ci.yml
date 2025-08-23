@@ -154,7 +154,7 @@ jobs:
 
       - name: Test client package installation
         run: |
-          CLIENT_WHL=$(ls dist/chaukas-spec-client-*.whl)
+          CLIENT_WHL=$(ls dist/chaukas_spec_client-*.whl)
           pip install "$CLIENT_WHL"
           python -c "
           from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientServiceStub
@@ -165,7 +165,7 @@ jobs:
       - name: Test server package installation
         run: |
           pip uninstall -y chaukas-spec-client
-          SERVER_WHL=$(ls dist/chaukas-spec-server-*.whl)
+          SERVER_WHL=$(ls dist/chaukas_spec_server-*.whl)
           pip install "$SERVER_WHL"
           python -c "
           from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServiceServicer
