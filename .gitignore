@@ -1,7 +1,6 @@
 # Generated Protocol Buffer code
 .generated/
 go/chaukas/
-go/go.sum
 
 # Package builds
 dist/

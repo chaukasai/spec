@@ -86,7 +86,7 @@ jobs:
 
       - name: Test Python imports
         run: |
-          PYTHONPATH=python python -c "
+          PYTHONPATH=.generated/python python -c "
           from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientServiceStub
           from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServiceServicer  
           from chaukas.spec.common.v1.events_pb2 import EventType
