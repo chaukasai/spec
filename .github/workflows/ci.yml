@@ -94,8 +94,19 @@ jobs:
           print('EventType.EVENT_TYPE_SESSION_START =', EventType.EVENT_TYPE_SESSION_START)
           "
 
+      # Only build packages once (not in matrix)
       - name: Build Python packages
+        if: matrix.go-version == '1.22' && matrix.python-version == '3.11'
         run: make build-packages
+      
+      # Upload packages (only from one matrix job)
+      - name: Upload package artifacts  
+        if: matrix.go-version == '1.22' && matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-packages
+          path: dist/
+          retention-days: 1
 
   package-test:
     name: Package Installation Test
