@@ -1,0 +1,15 @@
+name: Release Server Package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release-server:
+    name: Release Server Package
+    uses: ./.github/workflows/shared-release.yml
+    with:
+      package_type: server
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_SERVER_TOKEN }}
