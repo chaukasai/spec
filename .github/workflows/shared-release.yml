@@ -1,0 +1,137 @@
+name: Shared Release Workflow
+
+on:
+  workflow_call:
+    inputs:
+      package_type:
+        description: 'Package type to release (client or server)'
+        required: true
+        type: string
+    secrets:
+      PYPI_TOKEN:
+        description: 'PyPI token for publishing the package'
+        required: true
+
+jobs:
+  build-and-release:
+    name: Build and Release ${{ inputs.package_type }} Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Go 1.22
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Setup buf
+        uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate code and build packages
+        run: |
+          make gen-all
+          make build-packages
+
+      - name: Verify package contents
+        run: |
+          echo "=== Client Package Contents ==="
+          tar -tf dist/chaukas_spec_client-*.tar.gz | head -20
+          echo "=== Server Package Contents ==="
+          tar -tf dist/chaukas_spec_server-*.tar.gz | head -20
+
+      - name: Test package installations
+        run: |
+          # Test client package
+          CLIENT_WHL=$(ls dist/chaukas_spec_client-*.whl)
+          pip install "$CLIENT_WHL"
+          python -c "
+          from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientServiceStub
+          from chaukas.spec.common.v1.events_pb2 import EventType
+          print('✅ Client package installs and imports correctly')
+          "
+          pip uninstall -y chaukas-spec-client
+          
+          # Test server package  
+          SERVER_WHL=$(ls dist/chaukas_spec_server-*.whl)
+          pip install "$SERVER_WHL"
+          python -c "
+          from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServiceServicer
+          from chaukas.spec.common.v1.events_pb2 import EventType
+          print('✅ Server package installs and imports correctly')
+          "
+          pip uninstall -y chaukas-spec-server
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "## Changes in v${{ steps.version.outputs.VERSION }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD~1)..HEAD >> $GITHUB_OUTPUT || echo "- Initial release" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release v${{ steps.version.outputs.VERSION }}
+          body: |
+            # Chaukas Spec v${{ steps.version.outputs.VERSION }}
+
+            ## Installation
+
+            **For Client-side SDK Development:**
+            ```bash
+            pip install chaukas-spec-client==${{ steps.version.outputs.VERSION }}
+            ```
+
+            **For Server-side Platform Implementation:**  
+            ```bash
+            pip install chaukas-spec-server==${{ steps.version.outputs.VERSION }}
+            ```
+
+            **For Go Development:**
+            ```bash
+            go get github.com/chaukasai/spec@v${{ steps.version.outputs.VERSION }}
+            ```
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-packages
+          path: dist/
+          retention-days: 7
+
+      - name: Update Go module
+        run: |
+          # Go modules are automatically published via Git tags
+          # Verify the module can be fetched
+          GOPROXY=direct go list -m github.com/chaukasai/spec@v${{ steps.version.outputs.VERSION }}
+          echo "✅ Go module published successfully"
