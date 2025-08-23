@@ -97,7 +97,13 @@ jobs:
       # Only build packages once (not in matrix)
       - name: Build Python packages
         if: matrix.go-version == '1.22' && matrix.python-version == '3.11'
-        run: make build-packages
+        run: |
+          echo "Building packages with Go ${{ matrix.go-version }} and Python ${{ matrix.python-version }}"
+          # Ensure we have build dependencies
+          pip install build
+          make build-packages
+          echo "Built packages:"
+          ls -la dist/ || echo "No dist directory created"
       
       # Upload packages (only from one matrix job)
       - name: Upload package artifacts  
@@ -133,11 +139,18 @@ jobs:
           name: python-packages
           path: dist/
 
-      - name: List downloaded packages
+      - name: Debug directory structure
         run: |
-          ls -la dist/
-          echo "Found packages:"
-          find dist/ -name "*.whl" -o -name "*.tar.gz"
+          echo "=== Current working directory ==="
+          pwd
+          echo "=== Contents of current directory ==="
+          ls -la
+          echo "=== Looking for dist directory ==="
+          find . -name "dist" -type d 2>/dev/null || echo "No dist directory found"
+          echo "=== Looking for .whl files anywhere ==="
+          find . -name "*.whl" 2>/dev/null || echo "No .whl files found"
+          echo "=== Looking for any package files ==="
+          find . -name "*chaukas*" 2>/dev/null || echo "No chaukas files found"
 
       - name: Test client package installation
         run: |
