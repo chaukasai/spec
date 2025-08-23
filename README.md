@@ -23,7 +23,7 @@ python/chaukas/spec/     # Generated Python packages
 ├── client/v1/       # Client gRPC stubs + models
 └── server/v1/       # Server gRPC stubs + server-specific models
 
-go/chaukas/spec/         # Generated Go packages  
+go/                      # Generated Go packages  
 ├── common/v1/       # Data models
 ├── client/v1/       # Client gRPC stubs (reference)
 └── server/v1/       # Server gRPC stubs + server-specific models
@@ -33,13 +33,13 @@ go/chaukas/spec/         # Generated Go packages
 
 ### Installation
 ```bash
-pip install chaukas
+pip install chaukas-spec
 ```
 
 ### SDK Integration (Client-side)
 ```python
-from chaukas.spec.client.v1 import ChaukasClientStub
-from chaukas.spec.common.v1 import Event, EventType
+from chaukas.spec.client.v1.client_pb2_grpc import ChaukasClientStub
+from chaukas.spec.common.v1.events_pb2 import Event, EventType
 
 # Create gRPC client
 stub = ChaukasClientStub(channel)
@@ -55,8 +55,9 @@ stub.IngestEvent(event)
 
 ### Platform Implementation (Server-side)
 ```python
-from chaukas.spec.server.v1 import ChaukasServerServicer, IngestEventResponse
-from chaukas.spec.common.v1 import Event
+from chaukas.spec.server.v1.server_pb2_grpc import ChaukasServerServicer
+from chaukas.spec.server.v1.server_pb2 import IngestEventResponse
+from chaukas.spec.common.v1.events_pb2 import Event
 
 class MyChaukasServer(ChaukasServerServicer):
     def IngestEvent(self, request, context):
@@ -70,8 +71,8 @@ class MyChaukasServer(ChaukasServerServicer):
 
 ```go
 import (
-    "github.com/chaukas-ai/spec/v1/common"
-    "github.com/chaukas-ai/spec/v1/server"
+    "github.com/chaukasai/spec/common/v1"
+    "github.com/chaukasai/spec/server/v1"
 )
 
 type MyChaukasServer struct {

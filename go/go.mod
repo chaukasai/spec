@@ -1,4 +1,4 @@
-module github.com/chaukas-ai/spec
+module github.com/chaukasai/spec
 
 go 1.21
 
@@ -7,7 +7,7 @@ require (
 	google.golang.org/protobuf v1.34.1
 )
 
-replace github.com/chaukas-ai/spec => ./
+replace github.com/chaukasai/spec => ./
 
 require (
 	golang.org/x/net v0.25.0 // indirect

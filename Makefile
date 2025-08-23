@@ -23,13 +23,35 @@ gen-go: clean-go
 	buf generate
 	@echo "✓ Go server code generated in go/"
 
-# Fix Python import paths for proper relative imports
+# Reorganize Python files to nested chaukas.spec structure
 organize-python:
-	# Fix import paths for relative imports within each package
-	find python/chaukas/spec/client/v1 -name "*_pb2.py" -exec sed -i '' 's/from chaukas\.spec\.common\.v1 import/from ...common.v1 import/g' {} \; 2>/dev/null || true
-	find python/chaukas/spec/client/v1 -name "*_grpc.py" -exec sed -i '' 's/from chaukas\.spec\.common\.v1 import/from ...common.v1 import/g' {} \; 2>/dev/null || true
-	find python/chaukas/spec/server/v1 -name "*_pb2.py" -exec sed -i '' 's/from chaukas\.spec\.common\.v1 import/from ...common.v1 import/g' {} \; 2>/dev/null || true
-	find python/chaukas/spec/server/v1 -name "*_grpc.py" -exec sed -i '' 's/from chaukas\.spec\.common\.v1 import/from ...common.v1 import/g' {} \; 2>/dev/null || true
+	# Create nested directory structure  
+	mkdir -p python/chaukas/spec/client/v1 python/chaukas/spec/common/v1 python/chaukas/spec/server/v1
+	
+	# Move generated files from flat structure to nested structure
+	find python/client/v1 -name "*_pb2.*" -exec cp {} python/chaukas/spec/client/v1/ \; 2>/dev/null || true
+	find python/client/v1 -name "*_grpc.*" -exec cp {} python/chaukas/spec/client/v1/ \; 2>/dev/null || true
+	find python/common/v1 -name "*_pb2.*" -exec cp {} python/chaukas/spec/common/v1/ \; 2>/dev/null || true
+	find python/common/v1 -name "*_grpc.*" -exec cp {} python/chaukas/spec/common/v1/ \; 2>/dev/null || true
+	find python/server/v1 -name "*_pb2.*" -exec cp {} python/chaukas/spec/server/v1/ \; 2>/dev/null || true
+	find python/server/v1 -name "*_grpc.*" -exec cp {} python/chaukas/spec/server/v1/ \; 2>/dev/null || true
+	
+	# Fix import paths for relative imports within nested structure
+	find python/chaukas/spec/client/v1 -name "*.py" -exec sed -i '' 's/from common\.v1 import/from ...common.v1 import/g' {} \; 2>/dev/null || true
+	find python/chaukas/spec/client/v1 -name "*.py" -exec sed -i '' 's/from client\.v1 import/from . import/g' {} \; 2>/dev/null || true
+	find python/chaukas/spec/server/v1 -name "*.py" -exec sed -i '' 's/from common\.v1 import/from ...common.v1 import/g' {} \; 2>/dev/null || true
+	find python/chaukas/spec/server/v1 -name "*.py" -exec sed -i '' 's/from server\.v1 import/from . import/g' {} \; 2>/dev/null || true
+	find python/chaukas/spec/common/v1 -name "*.py" -exec sed -i '' 's/from common\.v1 import/from . import/g' {} \; 2>/dev/null || true
+	
+	# Create __init__.py files for nested structure
+	touch python/__init__.py
+	touch python/chaukas/__init__.py python/chaukas/spec/__init__.py
+	touch python/chaukas/spec/client/__init__.py python/chaukas/spec/client/v1/__init__.py
+	touch python/chaukas/spec/common/__init__.py python/chaukas/spec/common/v1/__init__.py
+	touch python/chaukas/spec/server/__init__.py python/chaukas/spec/server/v1/__init__.py
+	
+	# Remove flat structure after copying
+	rm -rf python/client python/common python/server
 
 # Clean generated Python files
 clean-python:
@@ -39,7 +61,7 @@ clean-python:
 
 # Clean generated Go files  
 clean-go:
-	rm -rf go/chaukas
+	rm -rf go/client go/common go/server
 
 # Clean all generated files
 clean-all: clean-python clean-go

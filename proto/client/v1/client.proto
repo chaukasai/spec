@@ -10,10 +10,10 @@ syntax = "proto3";
 
 package chaukas.spec.client.v1;
 
-option go_package = "github.com/chaukas-ai/spec/client/v1;v1";
+option go_package = "github.com/chaukasai/spec/client/v1;v1";
 
-import "chaukas/spec/common/v1/events.proto";
-import "chaukas/spec/common/v1/query.proto";
+import "common/v1/events.proto";
+import "common/v1/query.proto";
 import "google/protobuf/empty.proto";
 
 // Client-side Chaukas service for SDK integration
