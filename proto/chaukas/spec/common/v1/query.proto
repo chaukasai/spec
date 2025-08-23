@@ -10,30 +10,30 @@ syntax = "proto3";
 
 package chaukas.spec.common.v1;
 
-option go_package = "github.com/chaukasai/spec/chaukas/spec/common/v1;v1";
-
-import "google/protobuf/timestamp.proto";
 import "chaukas/spec/common/v1/events.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/chaukasai/spec/chaukas/spec/common/v1;v1";
 
 enum SortOrder {
   SORT_ORDER_UNSPECIFIED = 0;
-  SORT_ORDER_ASC  = 1;
+  SORT_ORDER_ASC = 1;
   SORT_ORDER_DESC = 2;
 }
 
 message TimeRange {
   google.protobuf.Timestamp start = 1;
-  google.protobuf.Timestamp end   = 2;
+  google.protobuf.Timestamp end = 2;
 }
 
 message QueryFilter {
-  string tenant_id  = 1;
+  string tenant_id = 1;
   string project_id = 2;
 
   // Optional scoping
   string session_id = 3;
-  string agent_id   = 4;
-  string span_id    = 5;
+  string agent_id = 4;
+  string span_id = 5;
 
   // Event fields
   repeated EventType types = 10;
@@ -50,8 +50,8 @@ message QueryFilter {
 
 message QueryRequest {
   QueryFilter filter = 1;
-  int32 page_size    = 2;   // default 100, max e.g. 1000
-  string page_token  = 3;
+  int32 page_size = 2; // default 100, max e.g. 1000
+  string page_token = 3;
   SortOrder order_by_time = 4; // default DESC
 }
 
@@ -62,10 +62,10 @@ message QueryResponse {
 
 message Capabilities {
   bool worm_retention = 1;
-  bool audit_proofs   = 2;
+  bool audit_proofs = 2;
   bool distributed_query = 3;
-  bool rbac           = 4;
-  bool sso            = 5;
+  bool rbac = 4;
+  bool sso = 5;
   bool policy_decisions = 6;
   bool data_access_events = 7;
 }
