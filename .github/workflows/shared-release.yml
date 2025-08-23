@@ -7,10 +7,6 @@ on:
         description: 'Package type to release (client or server)'
         required: true
         type: string
-    secrets:
-      PYPI_TOKEN:
-        description: 'PyPI token for publishing the package'
-        required: true
 
 jobs:
   build-and-release:

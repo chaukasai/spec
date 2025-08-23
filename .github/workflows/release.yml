@@ -9,6 +9,8 @@ jobs:
   build-packages:
     name: Build Packages and Create Release
     uses: ./.github/workflows/shared-release.yml
+    with:
+      package_type: client
 
   publish-client:
     name: Publish Client Package to PyPI
@@ -36,3 +38,25 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_CLIENT_TOKEN }}
         run: |
           twine upload dist/chaukas_spec_client-*
+
+  trigger-server-release:
+    name: Trigger Server Package Release
+    runs-on: ubuntu-latest
+    needs: publish-client
+    
+    steps:
+      - name: Trigger server release workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'release-server.yml',
+              ref: context.ref.replace('refs/tags/', ''),
+              inputs: {
+                client_run_id: '${{ github.run_id }}',
+                artifact_name: 'python-packages'
+              }
+            });
+            console.log('✅ Server release workflow triggered');
