@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
@@ -80,25 +81,29 @@ jobs:
           "
           pip uninstall -y chaukas-spec-server
 
-      - name: Generate changelog
+      - name: Generate CHANGELOG output
         id: changelog
         run: |
+          set +e  # don't bail early; we must close the EOF marker
           {
-            echo "CHANGELOG<<EOF"
-            echo "## Changes in v${{ steps.version.outputs.VERSION }}"
-            echo ""
+            echo "CHANGELOG<<__CHANGELOG__"
+            echo "## Changes in ${{ github.ref_name }}"
+            echo
             if git describe --tags --abbrev=0 HEAD~1 >/dev/null 2>&1; then
-              git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD~1)..HEAD
+              PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null)
+              git log --oneline --pretty=format:"- %s" "${PREV_TAG}"..HEAD || true
             else
               echo "- Initial release"
             fi
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
+            echo "__CHANGELOG__"
+          } >> "$GITHUB_OUTPUT"
+          set -e
 
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
           name: Release v${{ steps.version.outputs.VERSION }}
           body: |
             # Chaukas Spec v${{ steps.version.outputs.VERSION }}
