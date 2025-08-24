@@ -148,8 +148,8 @@ The repository includes a comprehensive CI/CD pipeline that:
 
 ### Manual Release Process
 1. Update version in package files
-2. Create a git tag: `git tag v1.0.0`
-3. Push the tag: `git push origin v1.0.0`
+2. Create a git tag: `git tag v1.0.1`
+3. Push the tag: `git push origin v1.0.1`
 4. GitHub Actions will automatically build and publish packages
 
 ## Architecture
