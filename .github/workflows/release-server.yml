@@ -18,12 +18,42 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Download package artifacts
-        uses: actions/download-artifact@v4
+      - name: Download package artifacts from client workflow
+        uses: actions/github-script@v7
         with:
-          name: ${{ inputs.artifact_name }}
-          path: dist/
-          run-id: ${{ inputs.client_run_id }}
+          script: |
+            const fs = require('fs');
+            
+            // Get artifacts from the client workflow run
+            const { data: artifacts } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: '${{ inputs.client_run_id }}'
+            });
+            
+            const packageArtifact = artifacts.artifacts.find(a => a.name === '${{ inputs.artifact_name }}');
+            if (!packageArtifact) {
+              throw new Error('Package artifacts not found from client workflow');
+            }
+            
+            // Download the artifact
+            const download = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: packageArtifact.id,
+              archive_format: 'zip'
+            });
+            
+            // Create dist directory and save the zip
+            fs.mkdirSync('dist', { recursive: true });
+            fs.writeFileSync('artifacts.zip', Buffer.from(download.data));
+            
+            // Extract the zip file
+            const { execSync } = require('child_process');
+            execSync('unzip -o artifacts.zip -d dist/');
+            execSync('ls -la dist/');
+            
+            console.log('✅ Package artifacts downloaded successfully');
 
       - name: Setup Python
         uses: actions/setup-python@v5
