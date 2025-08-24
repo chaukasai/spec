@@ -81,12 +81,28 @@ jobs:
           "
           pip uninstall -y chaukas-spec-server
 
-      - name: Generate CHANGELOG output
-        id: changelog
+      - name: Build release notes
         run: |
-          set +e  # don't bail early; we must close the EOF marker
           {
-            echo "CHANGELOG<<__CHANGELOG__"
+            echo "# Chaukas Spec v${{ steps.version.outputs.VERSION }}"
+            echo
+            echo "## Installation"
+            echo
+            echo "**For Client-side SDK Development:**"
+            echo '```bash'
+            echo "pip install chaukas-spec-client==${{ steps.version.outputs.VERSION }}"
+            echo '```'
+            echo
+            echo "**For Server-side Platform Implementation:**"
+            echo '```bash'
+            echo "pip install chaukas-spec-server==${{ steps.version.outputs.VERSION }}"
+            echo '```'
+            echo
+            echo "**For Go Development:**"
+            echo '```bash'
+            echo "go get github.com/chaukasai/spec@v${{ steps.version.outputs.VERSION }}"
+            echo '```'
+            echo
             echo "## Changes in ${{ github.ref_name }}"
             echo
             if git describe --tags --abbrev=0 HEAD~1 >/dev/null 2>&1; then
@@ -95,43 +111,20 @@ jobs:
             else
               echo "- Initial release"
             fi
-            echo "__CHANGELOG__"
-          } >> "$GITHUB_OUTPUT"
-          set -e
+          } > release-notes.md
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}   # e.g., v1.0.1
           name: Release v${{ steps.version.outputs.VERSION }}
-          body: |
-            # Chaukas Spec v${{ steps.version.outputs.VERSION }}
-
-            ## Installation
-
-            **For Client-side SDK Development:**
-            ```bash
-            pip install chaukas-spec-client==${{ steps.version.outputs.VERSION }}
-            ```
-
-            **For Server-side Platform Implementation:**  
-            ```bash
-            pip install chaukas-spec-server==${{ steps.version.outputs.VERSION }}
-            ```
-
-            **For Go Development:**
-            ```bash
-            go get github.com/chaukasai/spec@v${{ steps.version.outputs.VERSION }}
-            ```
-
-            ${{ steps.changelog.outputs.CHANGELOG }}
-
+          body_path: release-notes.md        # <- use the file we just wrote
           files: |
             dist/*.whl
             dist/*.tar.gz
           draft: false
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
 
       - name: Update Go module
         run: |
