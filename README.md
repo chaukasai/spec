@@ -155,7 +155,7 @@ The repository includes a comprehensive CI/CD pipeline that:
    - `resources/client-init.py`
    - `resources/server-init.py`
    - `openapi/chaukas/spec/v1/public.yaml`
-2. Create and push a version tag: `git tag v1.0.1 && git push origin v1.0.1`
+2. Create and push a version tag: `git tag v1.0.2 && git push origin v1.0.2`
 3. GitHub Actions automatically builds and publishes packages using PyPI Trusted Publishing
 
 **Requirements:**
@@ -166,10 +166,21 @@ The repository includes a comprehensive CI/CD pipeline that:
 
 The specification supports comprehensive agent observability through:
 
-- **Event Types**: SESSION_START, AGENT_START, MODEL_INVOCATION_START, TOOL_CALL_START, etc.
-- **Span-based Tracking**: Distributed tracing with parent-child relationships
+- **Comprehensive Event Types**: 
+  - Session lifecycle: SESSION_START, SESSION_END
+  - Agent operations: AGENT_START, AGENT_END, AGENT_HANDOFF
+  - Model invocations: MODEL_INVOCATION_START, MODEL_INVOCATION_END  
+  - Tool interactions: TOOL_CALL_START, TOOL_CALL_END
+  - Protocol calls: MCP_CALL_START, MCP_CALL_END
+  - I/O events: INPUT_RECEIVED, OUTPUT_EMITTED
+  - Error handling: ERROR, RETRY
+- **Distributed Tracing**: Full trace correlation with trace_id field across all events
+- **Agent Handoff Tracking**: Complete agent-to-agent transition monitoring with context
+- **MCP Integration**: Native Model Context Protocol call tracking and observability
+- **Enhanced Tool Tracking**: Granular function-level tracking within tools
+- **Span-based Architecture**: Parent-child relationships for complex agent workflows
 - **Rich Metadata**: Performance metrics, cost tracking, infrastructure data
-- **Audit Features**: WORM compliance, content hashing, integrity proofs
+- **Audit Features**: WORM compliance, content hashing, integrity proofs  
 - **Privacy**: PII categorization, redaction capabilities
 - **Multi-tenancy**: Tenant and project scoping
 

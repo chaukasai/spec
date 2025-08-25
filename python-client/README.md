@@ -53,12 +53,17 @@ EventType.EVENT_TYPE_SESSION_END
 # Agent spans  
 EventType.EVENT_TYPE_AGENT_START
 EventType.EVENT_TYPE_AGENT_END
+EventType.EVENT_TYPE_AGENT_HANDOFF
 
 # LLM/Tool spans
 EventType.EVENT_TYPE_MODEL_INVOCATION_START
 EventType.EVENT_TYPE_MODEL_INVOCATION_END
 EventType.EVENT_TYPE_TOOL_CALL_START
 EventType.EVENT_TYPE_TOOL_CALL_END
+
+# MCP (Model Context Protocol) spans
+EventType.EVENT_TYPE_MCP_CALL_START
+EventType.EVENT_TYPE_MCP_CALL_END
 
 # I/O Events
 EventType.EVENT_TYPE_INPUT_RECEIVED
@@ -91,14 +96,20 @@ print("Event batch ingested!")
 
 ```python
 from chaukas.spec.client.v1.client_pb2 import QueryEventsRequest
-from chaukas.spec.common.v1.query_pb2 import QueryRequest, SortOrder
+from chaukas.spec.common.v1.query_pb2 import QueryRequest, QueryFilter, SortOrder
 
-# Query events
-query = QueryRequest(
+# Query events with enhanced filtering
+filter = QueryFilter(
     tenant_id="tenant_123",
     project_id="project_456",
-    limit=100,
-    sort_order=SortOrder.SORT_ORDER_DESC
+    trace_id="trace_abc123",  # New: Filter by distributed trace ID
+    session_id="session_abc"
+)
+
+query = QueryRequest(
+    filter=filter,
+    page_size=100,
+    order_by_time=SortOrder.SORT_ORDER_DESC
 )
 
 request = QueryEventsRequest(query=query)
@@ -106,7 +117,39 @@ response = client.QueryEvents(request)
 
 print(f"Found {len(response.response.events)} events")
 for event in response.response.events:
-    print(f"- {event.event_id}: {event.type}")
+    print(f"- {event.event_id}: {event.type} (trace: {event.trace_id})")
+```
+
+### Advanced Event Creation with New Fields
+
+```python
+# Create event with distributed tracing
+event = Event(
+    event_id="evt_123",
+    type=EventType.EVENT_TYPE_AGENT_HANDOFF,
+    session_id="session_abc",
+    tenant_id="tenant_123", 
+    project_id="project_456",
+    trace_id="trace_abc123"  # New: Distributed trace correlation
+)
+
+# Enhanced tool call with function name
+from chaukas.spec.common.v1.events_pb2 import ToolCall
+from google.protobuf.struct_pb2 import Struct
+
+tool_call = ToolCall(
+    id="call_123",
+    name="calculator",
+    function_name="multiply",  # New: Specific function within tool
+    arguments=Struct()  # Add your arguments here
+)
+
+tool_event = Event(
+    event_id="evt_tool_456",
+    type=EventType.EVENT_TYPE_TOOL_CALL_START,
+    trace_id="trace_abc123",
+    tool_call=tool_call
+)
 ```
 
 ## Error Handling

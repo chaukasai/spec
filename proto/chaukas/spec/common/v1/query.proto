@@ -34,6 +34,7 @@ message QueryFilter {
   string session_id = 3;
   string agent_id = 4;
   string span_id = 5;
+  string trace_id = 6; // Filter by distributed trace identifier
 
   // Event fields
   repeated EventType types = 10;
