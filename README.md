@@ -146,11 +146,21 @@ The repository includes a comprehensive CI/CD pipeline that:
 4. **📦 Package Building**: Creates separate client and server Python packages
 5. **🚀 Automated Releases**: Publishes to PyPI and Go modules on version tags
 
-### Manual Release Process
-1. Update version in package files
-2. Create a git tag: `git tag v1.0.1`
-3. Push the tag: `git push origin v1.0.1`
-4. GitHub Actions will automatically build and publish packages
+### Release Process
+
+**Automated via PyPI Trusted Publishing:**
+1. Update version in package files:
+   - `python-client/pyproject.toml`
+   - `python-server/pyproject.toml` 
+   - `resources/client-init.py`
+   - `resources/server-init.py`
+   - `openapi/chaukas/spec/v1/public.yaml`
+2. Create and push a version tag: `git tag v1.0.1 && git push origin v1.0.1`
+3. GitHub Actions automatically builds and publishes packages using PyPI Trusted Publishing
+
+**Requirements:**
+- GitHub environments `pypi-client` and `pypi-server` configured
+- PyPI Trusted Publishing enabled for both packages
 
 ## Architecture
 
