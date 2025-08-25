@@ -30,12 +30,15 @@ enum EventType {
   // Agent spans
   EVENT_TYPE_AGENT_START = 10;
   EVENT_TYPE_AGENT_END = 11;
+  EVENT_TYPE_AGENT_HANDOFF = 12;
 
   // LLM/tool spans
   EVENT_TYPE_MODEL_INVOCATION_START = 20;
   EVENT_TYPE_MODEL_INVOCATION_END = 21;
   EVENT_TYPE_TOOL_CALL_START = 22;
   EVENT_TYPE_TOOL_CALL_END = 23;
+  EVENT_TYPE_MCP_CALL_START = 24;
+  EVENT_TYPE_MCP_CALL_END = 25;
 
   // I/O
   EVENT_TYPE_INPUT_RECEIVED = 30;
@@ -93,6 +96,7 @@ message ToolCall {
   string name = 2;
   google.protobuf.Struct arguments = 3; // arbitrary JSON args
   bool auth_required = 4;
+  string function_name = 5; // Specific function within the tool
 }
 
 message ToolResponse {
@@ -178,6 +182,27 @@ message CostDetails {
   double output_rate_per_token = 11;
 }
 
+message AgentHandoff {
+  string from_agent_id = 1;
+  string from_agent_name = 2;
+  string to_agent_id = 3;
+  string to_agent_name = 4;
+  google.protobuf.Struct handoff_data = 5;
+  string reason = 6;
+  string handoff_type = 7; // "sequential", "parallel", "conditional"
+}
+
+message MCPCall {
+  string server_name = 1;
+  string server_url = 2;
+  string operation = 3; // "tools/list", "resources/read", etc.
+  string method = 4; // "GET", "POST", etc.
+  google.protobuf.Struct request = 5;
+  google.protobuf.Struct response = 6;
+  string protocol_version = 7;
+  double execution_time_ms = 8;
+}
+
 message ErrorInfo {
   string error_message = 1;
   string error_code = 2;
@@ -226,6 +251,7 @@ message Event {
   // Misc
   string branch = 21;
   repeated string tags = 22;
+  string trace_id = 23; // Distributed trace identifier
 
   // Content union (exactly one when applicable)
   oneof content {
@@ -237,6 +263,8 @@ message Event {
     DataAccess data_access = 35;
     google.protobuf.Struct state_update = 36;
     ErrorInfo error = 37;
+    AgentHandoff agent_handoff = 38;
+    MCPCall mcp_call = 39;
   }
 
   // Cross-cutting optional attachments (may appear with any type)

@@ -90,12 +90,13 @@ class MyChaukasServer(ChaukasServerServiceServicer):
         from chaukas.spec.common.v1.query_pb2 import QueryResponse
         from chaukas.spec.common.v1.events_pb2 import Event
         
-        # Example: return some events
+        # Example: return some events (enhanced with new fields)
         events = [
             Event(
                 event_id="evt_example",
                 type=EventType.EVENT_TYPE_SESSION_START,
-                session_id=query.session_id or "default_session"
+                session_id=query.session_id or "default_session",
+                trace_id=query.trace_id or "default_trace"  # New: trace correlation
             )
         ]
         
@@ -118,6 +119,45 @@ class MyChaukasServer(ChaukasServerServiceServicer):
             },
             avg_session_duration_ms=30000.0
         )
+
+### Working with New Event Types
+
+```python
+from chaukas.spec.common.v1.events_pb2 import (
+    Event, EventType, AgentHandoff, MCPCall, ToolCall
+)
+from google.protobuf.struct_pb2 import Struct
+
+def handle_agent_handoff_event(self, event):
+    """Process agent handoff events"""
+    if event.HasField('agent_handoff'):
+        handoff = event.agent_handoff
+        print(f"Agent handoff: {handoff.from_agent_name} -> {handoff.to_agent_name}")
+        print(f"Reason: {handoff.reason}")
+        print(f"Type: {handoff.handoff_type}")
+
+def handle_mcp_call_event(self, event):
+    """Process MCP call events"""
+    if event.HasField('mcp_call'):
+        mcp = event.mcp_call
+        print(f"MCP Call: {mcp.server_name} - {mcp.operation}")
+        print(f"Execution time: {mcp.execution_time_ms}ms")
+
+def create_enhanced_tool_event(self):
+    """Create tool event with enhanced function tracking"""
+    tool_call = ToolCall(
+        id="call_123",
+        name="calculator",
+        function_name="multiply",  # New: granular function tracking
+        auth_required=False
+    )
+    
+    return Event(
+        event_id="evt_tool_456",
+        type=EventType.EVENT_TYPE_TOOL_CALL_START,
+        trace_id="trace_abc123",  # New: distributed tracing
+        tool_call=tool_call
+    )
 
 # Run the server
 def serve():
@@ -238,12 +278,23 @@ class AsyncChaukasServer(ChaukasServerServiceServicer):
 
 ## Available Message Types
 
-### Events
-- `Event` - Core event structure
+### Core Events
+- `Event` - Core event structure with trace_id for distributed tracing
 - `EventBatch` - Batch of events for bulk processing
-- `EventType` - Enumeration of all event types
+- `EventType` - Comprehensive enumeration including AGENT_HANDOFF, MCP_CALL_START/END
 - `EventStatus` - Event processing status
 - `Severity` - Event severity levels
+
+### Enhanced Content Types
+- `MessageContent` - User/agent/system messages
+- `ToolCall` - Tool invocations with enhanced function_name field
+- `ToolResponse` - Tool execution results  
+- `LLMInvocation` - Language model calls
+- `AgentHandoff` - **New**: Agent-to-agent transition tracking
+- `MCPCall` - **New**: Model Context Protocol call details
+- `PolicyDecision` - Policy enforcement results
+- `DataAccess` - Data retrieval operations
+- `ErrorInfo` - Error information and recovery
 
 ### Server Responses
 - `IngestEventResponse` - Single event ingestion result
@@ -252,6 +303,7 @@ class AsyncChaukasServer(ChaukasServerServiceServicer):
 
 ### Query Support
 - `QueryRequest` - Event query parameters
+- `QueryFilter` - **Enhanced**: Now includes trace_id filtering
 - `QueryResponse` - Query results with pagination
 - `TimeRange` - Time-based filtering
 - `SortOrder` - Result ordering options

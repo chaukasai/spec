@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Chaukas Public API
-  version: 1.0.1
+  version: 1.0.2
 servers:
   - url: https://api.example.com
 paths:
@@ -72,7 +72,7 @@ components:
     # ── Core enums (as strings for JSON) ──────────────────────────────────────
     EventType:
       type: string
-      enum: [SESSION_START, SESSION_END, AGENT_START, AGENT_END, MODEL_INVOCATION_START, MODEL_INVOCATION_END, TOOL_CALL_START, TOOL_CALL_END, INPUT_RECEIVED, OUTPUT_EMITTED, ERROR, RETRY, POLICY_DECISION, DATA_ACCESS, STATE_UPDATE, SYSTEM]
+      enum: [SESSION_START, SESSION_END, AGENT_START, AGENT_END, AGENT_HANDOFF, MODEL_INVOCATION_START, MODEL_INVOCATION_END, TOOL_CALL_START, TOOL_CALL_END, MCP_CALL_START, MCP_CALL_END, INPUT_RECEIVED, OUTPUT_EMITTED, ERROR, RETRY, POLICY_DECISION, DATA_ACCESS, STATE_UPDATE, SYSTEM]
     EventStatus:
       type: string
       enum: [STARTED, IN_PROGRESS, COMPLETED, FAILED, CANCELLED]
@@ -100,6 +100,7 @@ components:
         name: { type: string }
         arguments: { type: object, additionalProperties: true }
         auth_required: { type: boolean }
+        function_name: { type: string }
       required: [kind, name]
     ToolResponse:
       type: object
@@ -160,6 +161,31 @@ components:
         recoverable: { type: boolean }
         recovery_action: { type: string }
       required: [kind, error_message]
+    AgentHandoff:
+      type: object
+      properties:
+        kind: { type: string, enum: ["agent_handoff"] }
+        from_agent_id: { type: string }
+        from_agent_name: { type: string }
+        to_agent_id: { type: string }
+        to_agent_name: { type: string }
+        handoff_data: { type: object, additionalProperties: true }
+        reason: { type: string }
+        handoff_type: { type: string, enum: ["sequential", "parallel", "conditional"] }
+      required: [kind, from_agent_id, to_agent_id]
+    MCPCall:
+      type: object
+      properties:
+        kind: { type: string, enum: ["mcp_call"] }
+        server_name: { type: string }
+        server_url: { type: string }
+        operation: { type: string }
+        method: { type: string }
+        request: { type: object, additionalProperties: true }
+        response: { type: object, additionalProperties: true }
+        protocol_version: { type: string }
+        execution_time_ms: { type: number }
+      required: [kind, server_name, operation]
     RedactionInfo:
       type: object
       properties:
@@ -176,6 +202,8 @@ components:
         - $ref: '#/components/schemas/PolicyDecision'
         - $ref: '#/components/schemas/DataAccess'
         - $ref: '#/components/schemas/ErrorInfo'
+        - $ref: '#/components/schemas/AgentHandoff'
+        - $ref: '#/components/schemas/MCPCall'
       discriminator:
         propertyName: kind
         mapping:
@@ -186,6 +214,8 @@ components:
           policy_decision: '#/components/schemas/PolicyDecision'
           data_access: '#/components/schemas/DataAccess'
           error_info: '#/components/schemas/ErrorInfo'
+          agent_handoff: '#/components/schemas/AgentHandoff'
+          mcp_call: '#/components/schemas/MCPCall'
 
     Event:
       type: object
@@ -212,6 +242,7 @@ components:
         worm_proof_id: { type: string }
         branch: { type: string }
         tags: { type: array, items: { type: string } }
+        trace_id: { type: string }
         content: { $ref: '#/components/schemas/EventContent' }
         retry:
           type: object
@@ -282,6 +313,7 @@ components:
         session_id: { type: string }
         agent_id: { type: string }
         span_id: { type: string }
+        trace_id: { type: string }
         types:
           type: array
           items: { $ref: '#/components/schemas/EventType' }
